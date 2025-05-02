@@ -3,10 +3,12 @@
 	One of the most simple standalone machines in the department, but fairly important in its own right.
 	Meat goes in, Sample plates come out. The sample plates hold the mutations and cloning info of the meat the object came from.
 	It also talks in a really peppy voice, even while grinding creatures into a fine paste.
+
+	25.04.24 - CFW -It no longer talks, courtesy of Dr. Farson, as requested by several players
 */
 /obj/machinery/genetics/pulper
 	name = "Xenofauna Genetics Pulper"
-	desc = "A morosely clinical device that takes raw meat (or whole bodies), destroys it on a cellular level, and organizes as much genetic information as it can into sample plates. It also won't shut up."
+	desc = "A morosely clinical device that takes raw meat (or whole bodies), destroys it on a cellular level, and organizes as much genetic information as it can into sample plates."
 	icon = 'icons/obj/kitchen.dmi'
 	icon_state = "processor"
 	var/gib_time = 40 // Time from starting until sample plates appear.
@@ -24,7 +26,7 @@
 
 /obj/machinery/genetics/pulper/attackby(obj/item/I, mob/user)
 	if(!user.stats?.getPerk(PERK_SI_SCI) && !usr.stat_check(STAT_COG, 35) && !user.stats?.getPerk(PERK_NERD) && !usr.stat_check(STAT_BIO, 70)) //So someone that has basic chems or level up can be an assent
-		to_chat(usr, SPAN_WARNING("The console pityingly suggests: \"Sorry hun, maybe you should get help from a scientist~?\""))
+		to_chat(usr, SPAN_WARNING("This machine is too advanced for you to use."))
 		return
 
 	if(default_deconstruction(I, user))
@@ -32,19 +34,19 @@
 	if(default_part_replacement(I, user))
 		return
 	if(stat & (NOPOWER|BROKEN))
-		to_chat(user, SPAN_WARNING("The pulper is inactive and blessedly silent."))
+		to_chat(user, SPAN_WARNING("The pulper is inactive and ominously silent."))
 		return
 	if(pulping)
-		src.visible_message(SPAN_DANGER("The pulper trills: \"The pulper is running~! Please wait for it to finish~\""))
+		src.visible_message(SPAN_DANGER("The pupler is currently running, you have to wait for it to finish."))
 		return
 
 	//Inserting a sample
 	if(istype(I, /obj/item/reagent_containers/snacks/meat))
 		if(meat.len >= 5)
-			src.visible_message(SPAN_WARNING("The pulper says in a sing-song voice: \"The Pulper is full~!\""))
+			src.visible_message(SPAN_WARNING("The pulper is full, please turn it on and process the contents before filling it again."))
 			return
 		if(occupant)
-			src.visible_message(SPAN_WARNING("The pulper sings: \"The Pulper has a whole creature in there, process that first~!\""))
+			src.visible_message(SPAN_WARNING("The pulper is full, please turn it on and process the contents before filling it again."))
 			return
 
 		user.drop_item()
@@ -58,16 +60,16 @@
 
 /obj/machinery/genetics/pulper/affect_grab(mob/user, mob/living/target, state)
 	if(stat & (NOPOWER|BROKEN))
-		to_chat(user, SPAN_WARNING("The pulper is inactive and blessedly silent."))
+		to_chat(user, SPAN_WARNING("The pulper is inactive and ominously silent."))
 		return
 	if(pulping)
-		src.visible_message(SPAN_WARNING("The pulper trills: \"The pulper is running~! Please wait for it to finish~!\""))
+		src.visible_message(SPAN_WARNING("The pupler is currently running, you have to wait for it to finish."))
 		return
 	if(istype(target, /mob/living/carbon/human))
-		src.visible_message(SPAN_WARNING("The pulper chimes in: \"Uh Oh~ Humans aren't allowed in the pulper~!\""))
+		src.visible_message(SPAN_WARNING("The pulper's biosaftey sensors activate and prevent you from putting a human inside it."))
 		return
 	if(meat.len > 0)
-		src.visible_message(SPAN_WARNING("The pulper chuckles: \"Not enough room~! Process the meat inside before adding a whole creature to it~!\""))
+		src.visible_message(SPAN_WARNING("The pulper is full, please turn it on and process the contents before filling it again."))
 		return
 
 	//Check if the creature actually bears meat, IE: It has DNA
@@ -88,7 +90,7 @@
 		temp_meat_type = /obj/item/reagent_containers/snacks/meat
 
 	if(temp_meat_count <= 0)
-		src.visible_message(SPAN_WARNING("The pulper gently reminds: \"That is creature has no genetic material, hun~\""))
+		src.visible_message(SPAN_WARNING("This creature doesn't have any genetic material to extract."))
 
 	//Do the insertion step
 	if(do_after(user, 60, target))
@@ -100,13 +102,13 @@
 
 /obj/machinery/genetics/pulper/attack_hand(mob/user as mob)
 	if(stat & (NOPOWER|BROKEN))
-		to_chat(user, SPAN_WARNING("The pulper is inactive and blessedly silent."))
+		to_chat(user, SPAN_WARNING("The pulper is inactive and ominously silent."))
 		return
 	if(!user.stats?.getPerk(PERK_SI_SCI) && !usr.stat_check(STAT_COG, 35) && !user.stats?.getPerk(PERK_NERD) && !usr.stat_check(STAT_BIO, 70)) //So someone that has basic chems or level up can be an assent
-		to_chat(usr, SPAN_WARNING("The console pityingly suggests: \"Sorry hun, maybe you should get help from a scientist~?\""))
+		to_chat(usr, SPAN_WARNING("This machine is too advanced for you to use."))
 		return
 	if(pulping)
-		src.visible_message( SPAN_DANGER("The pulper trills: \"The pulper is running~! Wait for it to finish.\""))
+		src.visible_message( SPAN_DANGER("The pupler is currently running, you have to wait for it to finish."))
 		return
 	else
 		src.startpulping(user)
@@ -130,7 +132,7 @@
 	update_icon()
 	spawn(gib_time) //Escape in time?
 		if(occupant && (occupant.loc == src)  && occupant_meat_count && ispath(occupant_meat_type, /obj/item/reagent_containers/snacks/meat))
-			src.visible_message(SPAN_WARNING("The pulper says ecstatically: \"Pulping~! Creature~!\""))
+			src.visible_message(SPAN_WARNING("The pulper pings as it extracts the genetic material from [occupant]."))
 			//big-range splatter
 			playsound(src.loc, 'sound/effects/splat.ogg', 50, 1)
 			var/obj/effect/decal/cleanable/blood/splatter/animated/B = new(src.loc)
@@ -157,7 +159,7 @@
 			occupant_meat_count = 0
 
 		if(meat.len >= 0)
-			src.visible_message(SPAN_WARNING("The pulper says ecstatically: \"Pulping~! Meat~!\""))
+			src.visible_message(SPAN_WARNING("The pulper pings as it extracts the genetic material from the meat."))
 
 			//low-range splatter
 			playsound(src.loc, 'sound/effects/splat.ogg', 50, 1)
